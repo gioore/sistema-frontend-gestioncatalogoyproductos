@@ -116,8 +116,10 @@ Formato del objeto Producto:
 
 ## Integrantes
 
-- Gerson Orellana — Líder del proyecto / CRUD
-- Albino — Listado de productos
-- Didhyer — Filtros y procesamiento de datos
-- Javier — Interfaz y experiencia de usuario
-- Keily — Vista de detalle e integración
+- Gerson Orellana — Líder del proyecto / CRUD completo
+- Albino — Filtros dinámicos y menú de categorías (DISTINCT)
+- Javier — Interfaz y experiencia de usuario (responsive, ofertas)
+- Didhyer — Listado de productos (cards, carga, errores)
+- Keily — Vista de detalle, integración, pruebas y presentación
+
+> Detalle de tareas, ramas y criterios de aceptación en **[TAREAS.md](TAREAS.md)**.
