@@ -69,7 +69,7 @@ src/
 │                DeleteConfirmModal.jsx, ProductDetailModal.jsx
 ├─ pages/        CatalogPage.jsx, NotFoundPage.jsx
 ├─ App.jsx                       → Rutas de la aplicación
-└─ main.jsx                      → Punto de entrada (BrowserRouter + ProductProvider)
+└─ main.jsx                      → Punto de entrada (HashRouter + ProductProvider)
 ```
 
 ## Flujo de trabajo con Git
@@ -95,6 +95,23 @@ Ramas sugeridas:
 - `feature/detalle` — detalle e integración (Keily)
 
 > Reglas: no hacer `push` directo a `main`; los PRs los revisa el líder del equipo.
+
+## Orden recomendado de trabajo (¿quién primero? ¿quién después?)
+
+Para integrar sin conflictos, **el listado debe existir antes que los filtros y el detalle**, y la UI se estiliza al final sobre el resto. El CRUD es independiente y puede ir en paralelo.
+
+| # | Quién | Ramas que se integran | Por qué en ese orden |
+|---|-------|----------------------|----------------------|
+| 1. | **Gerson (líder)** | `feature/crud` | Puede empezar hoy en paralelo con todo el mundo (no depende de nadie). |
+| 2. | **Didhyer** | `feature/listado` → `main` | **Primero debe mostrar algo.** Las cards son la base visual; su PR siempre se integra antes que filtros y detalle. |
+| 3. | **Albino** | `feature/filtros` → `main` | Depende del listado: filtra sobre los productos ya visibles y construye el menú de categorías sobre la lista. |
+| 4. | **Keily** | `feature/detalle` → `main` | Reutiliza el listado y el estado global; agrega la vista de detalle y luego hace la **integración y pruebas finales**. |
+| 5. | **Javier** | `feature/ui` → `main` | **Va al final**: estiliza sobre piezas ya funcionales (cards, filtros, modales, CRUD). Evita pisar el trabajo de los demás. |
+| 6. | **Gerson** | `feature/crud` → merge final | Integra su CRUD y hace el **merge final a `main`**. |
+
+### Dependencias clave
+- `feature/filtros` y `feature/detalle` **requieren** que ya exista `feature/listado` en `main`.
+- `feature/ui` estiliza todos los componentes; si va antes, genera conflictos con quienes cambian esos mismos archivos.
 
 ## Datos de referencia (API)
 
