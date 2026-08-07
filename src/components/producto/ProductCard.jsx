@@ -1,7 +1,21 @@
 import { Link } from 'react-router-dom'
 
 export function ProductCard({ producto, onVer, onEliminar }) {
+  const imagenFallback = 'https://placehold.co/600x400?text=Sin+imagen'
+  const productoId = producto?.id
+  const nombreProducto = String(producto?.nombre ?? '').trim() || 'Producto sin nombre'
+  const categoriaProducto =
+    String(producto?.categoriaNombre ?? '').trim() || 'Sin categoría'
+  const descripcionProducto =
+    String(producto?.descripcion ?? '').trim() ||
+    'Este producto no tiene una descripción disponible.'
+  const puedeEditar = productoId !== null && productoId !== undefined
+
   const formatearPrecio = (valor) => {
+    if (valor === null || valor === undefined || valor === '') {
+      return '—'
+    }
+
     const numero = Number(valor)
 
     if (!Number.isFinite(numero)) {
@@ -17,26 +31,32 @@ export function ProductCard({ producto, onVer, onEliminar }) {
     producto?.precioOferta !== undefined
 
   const imagenProducto =
-    producto?.imagen ||
-    'https://placehold.co/600x400?text=Sin+imagen'
+    String(producto?.imagen ?? '').trim() || imagenFallback
+
+  const verProducto = () => {
+    onVer?.(producto)
+  }
+
+  const eliminarProducto = () => {
+    onEliminar?.(producto)
+  }
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
       <button
         type="button"
-        onClick={() => onVer(producto)}
+        onClick={verProducto}
         className="relative block w-full overflow-hidden bg-slate-100 text-left"
-        aria-label={`Ver detalles de ${producto?.nombre || 'producto'}`}
+        aria-label={`Ver detalles de ${nombreProducto}`}
       >
         <div className="aspect-[4/3] w-full overflow-hidden">
           <img
             src={imagenProducto}
-            alt={producto?.nombre || 'Producto'}
+            alt={nombreProducto}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             onError={(evento) => {
               evento.currentTarget.onerror = null
-              evento.currentTarget.src =
-                'https://placehold.co/600x400?text=Sin+imagen'
+              evento.currentTarget.src = imagenFallback
             }}
           />
         </div>
@@ -57,17 +77,16 @@ export function ProductCard({ producto, onVer, onEliminar }) {
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3">
           <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-            {producto?.categoriaNombre || 'Sin categoría'}
+            {categoriaProducto}
           </span>
         </div>
 
         <h3 className="line-clamp-2 text-lg font-bold leading-6 text-slate-900">
-          {producto?.nombre || 'Producto sin nombre'}
+          {nombreProducto}
         </h3>
 
         <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">
-          {producto?.descripcion ||
-            'Este producto no tiene una descripción disponible.'}
+          {descripcionProducto}
         </p>
 
         <div className="mt-5 flex flex-1 items-end">
@@ -91,22 +110,32 @@ export function ProductCard({ producto, onVer, onEliminar }) {
         <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
           <button
             type="button"
-            onClick={() => onVer(producto)}
+            onClick={verProducto}
             className="rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Ver producto
           </button>
 
-          <Link
-            to={`/producto/${producto.id}/editar`}
-            className="rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-          >
-            Editar
-          </Link>
+          {puedeEditar ? (
+            <Link
+              to={`/producto/${productoId}/editar`}
+              className="rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+            >
+              Editar
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-400"
+            >
+              Editar
+            </button>
+          )}
 
           <button
             type="button"
-            onClick={() => onEliminar(producto)}
+            onClick={eliminarProducto}
             className="col-span-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700"
           >
             Eliminar producto
