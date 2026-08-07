@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react'
-import { normalizarCategoria } from '../utils/categorias.js'
+import {
+  contarProductosCatalogo,
+  extraerCategoriasDistinct,
+  normalizarCategoria,
+} from '../utils/categorias.js'
 
 export function useFilters(productos) {
   const [busqueda, setBusqueda] = useState('')
@@ -7,17 +11,13 @@ export function useFilters(productos) {
   const [soloOferta, setSoloOferta] = useState(false)
 
   const categoriasDistinct = useMemo(() => {
-    const mapa = new Map()
-    ;(productos || []).forEach((p) => {
-      const nombre = p?.categoriaNombre?.trim()
-      const clave = normalizarCategoria(nombre)
-      if (!clave) return
-      if (!mapa.has(clave)) {
-        mapa.set(clave, { id: p.categoriaId, nombre, clave })
-      }
-    })
-    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre))
+    return extraerCategoriasDistinct(productos)
   }, [productos])
+
+  const cantidadTotalProductos = useMemo(
+    () => contarProductosCatalogo(productos),
+    [productos],
+  )
 
   const filtrados = useMemo(() => {
     let lista = productos || []
@@ -45,7 +45,8 @@ export function useFilters(productos) {
     setCategoria,
     soloOferta,
     setSoloOferta,
-    categoriasDistinct: categoriasDistinct,
+    categoriasDistinct,
+    cantidadTotalProductos,
     filtrados,
   }
 }
