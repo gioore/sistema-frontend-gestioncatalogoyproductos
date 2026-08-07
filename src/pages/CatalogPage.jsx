@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext.jsx'
 import { useFilters } from '../hooks/useFilters.js'
 import { ProductList } from '../components/producto/ProductList.jsx'
 import { DeleteConfirmModal } from '../components/producto/DeleteConfirmModal.jsx'
+import { ProductDetailModal } from '../components/producto/ProductDetailModal.jsx'
 import { Spinner } from '../components/ui/Spinner.jsx'
 import { ErrorMessage } from '../components/ui/ErrorMessage.jsx'
 import { EmptyState } from '../components/ui/EmptyState.jsx'
@@ -14,6 +15,7 @@ export function CatalogPage() {
   const { filtrados, categoriasDistinct } = useFilters(productos)
 
   const [productoParaEliminar, setProductoParaEliminar] = useState(null)
+  const [productoParaVer, setProductoParaVer] = useState(null)
   const [eliminando, setEliminando] = useState(false)
 
   const confirmarEliminacion = async (producto) => {
@@ -22,11 +24,17 @@ export function CatalogPage() {
       await eliminarProducto(producto.id)
       notify('Producto eliminado correctamente.', 'success')
       setProductoParaEliminar(null)
+      if (productoParaVer?.id === producto.id) setProductoParaVer(null)
     } catch (err) {
       notify(err?.response?.data?.message || err?.message || 'No se pudo eliminar el producto.', 'error')
     } finally {
       setEliminando(false)
     }
+  }
+
+  const abrirEliminacion = (producto) => {
+    setProductoParaVer(null)
+    setProductoParaEliminar(producto)
   }
 
   if (loading) return <Spinner texto="Cargando productos..." />
@@ -44,8 +52,18 @@ export function CatalogPage() {
       {filtrados.length === 0 ? (
         <EmptyState />
       ) : (
-        <ProductList productos={filtrados} onEliminar={setProductoParaEliminar} />
+        <ProductList
+          productos={filtrados}
+          onVer={setProductoParaVer}
+          onEliminar={abrirEliminacion}
+        />
       )}
+
+      <ProductDetailModal
+        producto={productoParaVer}
+        onCerrar={() => setProductoParaVer(null)}
+        onEliminar={abrirEliminacion}
+      />
 
       <DeleteConfirmModal
         producto={productoParaEliminar}
