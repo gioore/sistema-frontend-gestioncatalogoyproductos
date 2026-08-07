@@ -1,85 +1,117 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export function ProductCard({ producto, onVer, onEliminar }) {
-  const [menuAbierto, setMenuAbierto] = useState(false)
+  const formatearPrecio = (valor) => {
+    const numero = Number(valor)
 
-  const cerrarMenu = () => setMenuAbierto(false)
+    if (!Number.isFinite(numero)) {
+      return '—'
+    }
 
-  const opcion = (accion) => () => {
-    cerrarMenu()
-    accion()
+    return `Q${numero.toFixed(2)}`
   }
 
+  const tieneOferta =
+    Boolean(producto?.enOferta) &&
+    producto?.precioOferta !== null &&
+    producto?.precioOferta !== undefined
+
+  const imagenProducto =
+    producto?.imagen ||
+    'https://placehold.co/600x400?text=Sin+imagen'
+
   return (
-    <article className="relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
       <button
         type="button"
-        className="flex flex-col text-left"
         onClick={() => onVer(producto)}
+        className="relative block w-full overflow-hidden bg-slate-100 text-left"
+        aria-label={`Ver detalles de ${producto?.nombre || 'producto'}`}
       >
-        <div className="aspect-[3/2] w-full overflow-hidden bg-slate-100">
+        <div className="aspect-[4/3] w-full overflow-hidden">
           <img
-            src={producto?.imagen || ''}
+            src={imagenProducto}
             alt={producto?.nombre || 'Producto'}
-            className="h-full w-full object-cover transition duration-300 hover:scale-105"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            onError={(evento) => {
+              evento.currentTarget.onerror = null
+              evento.currentTarget.src =
+                'https://placehold.co/600x400?text=Sin+imagen'
+            }}
           />
         </div>
-        <div className="flex flex-1 flex-col p-4">
-          <p className="text-xs text-slate-500">{producto?.categoriaNombre}</p>
-          <h3 className="mt-1 line-clamp-2 font-semibold text-slate-800">
-            {producto?.nombre}
-          </h3>
-          <p className="mt-2 text-lg font-bold text-slate-900">
-            {producto?.precio != null ? `Q${producto.precio}` : '—'}
-          </p>
-        </div>
+
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
+
+        {tieneOferta && (
+          <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-md">
+            Oferta
+          </span>
+        )}
+
+        <span className="absolute bottom-3 right-3 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur">
+          Ver detalle
+        </span>
       </button>
 
-      <div className="absolute right-3 top-3">
-        <button
-          type="button"
-          onClick={(evento) => {
-            evento.stopPropagation()
-            setMenuAbierto((v) => !v)
-          }}
-          className="rounded-full bg-white/90 p-1.5 text-slate-600 shadow-sm transition hover:bg-white hover:text-slate-900"
-          aria-label="Acciones"
-          aria-expanded={menuAbierto}
-        >
-          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-          </svg>
-        </button>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-3">
+          <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+            {producto?.categoriaNombre || 'Sin categoría'}
+          </span>
+        </div>
 
-        {menuAbierto && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={cerrarMenu} aria-hidden="true"></div>
-            <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <button
-                type="button"
-                onClick={opcion(() => onVer(producto))}
-                className="block w-full px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
-              >
-                Ver detalle
-              </button>
-              <Link
-                to={`/producto/${producto.id}/editar`}
-                onClick={cerrarMenu}
-                className="block w-full px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
-              >
-                Editar
-              </Link>
-              <button
-                type="button"
-                onClick={opcion(() => onEliminar(producto))}
-                className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-              >
-                Eliminar
-              </button>
+        <h3 className="line-clamp-2 text-lg font-bold leading-6 text-slate-900">
+          {producto?.nombre || 'Producto sin nombre'}
+        </h3>
+
+        <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">
+          {producto?.descripcion ||
+            'Este producto no tiene una descripción disponible.'}
+        </p>
+
+        <div className="mt-5 flex flex-1 items-end">
+          {tieneOferta ? (
+            <div>
+              <p className="text-sm text-slate-400 line-through">
+                {formatearPrecio(producto?.precio)}
+              </p>
+
+              <p className="text-2xl font-bold text-emerald-600">
+                {formatearPrecio(producto?.precioOferta)}
+              </p>
             </div>
-          </>
-        )}
+          ) : (
+            <p className="text-2xl font-bold text-slate-900">
+              {formatearPrecio(producto?.precio)}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+          <button
+            type="button"
+            onClick={() => onVer(producto)}
+            className="rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Ver producto
+          </button>
+
+          <Link
+            to={`/producto/${producto.id}/editar`}
+            className="rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          >
+            Editar
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => onEliminar(producto)}
+            className="col-span-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700"
+          >
+            Eliminar producto
+          </button>
+        </div>
       </div>
     </article>
   )
