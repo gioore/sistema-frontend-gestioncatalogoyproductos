@@ -74,10 +74,12 @@ Distribución de trabajo sobre la estructura base (`feature/base`). Cada persona
 
 ## Keily — Detalle, integración, pruebas y presentación (rama: `feature/detalle`)
 
-- [ ] Consulta por ID (GET `/api/producto/{id}`).
-- [ ] Vista/modal de detalle del producto (`ProductDetailModal.jsx`).
+> Nota: Gerson dejó un **`ProductDetailModal` funcional básico** (abre al hacer click en la tarjeta, muestra info/precio/oferta y acciones Editar/Eliminar) como parte del CRUD. Tu trabajo aquí es **mejorarlo y completar** el resto.
+
+- [ ] Mejorar el modal de detalle: más info, mejor layout, transiciones (apoyarte en la UI de Javier).
+- [ ] Conectar el **GET por ID** (`getProductoById` en `api/productoService.js`) para el detalle cuando convenga.
 - [ ] Integrar los módulos de todos (probar el flujo completo).
-- [ ] Pruebas funcionales del CRUD y filtros.
+- [ ] Pruebas funcionales del CRUD, filtros y detalle.
 - [ ] Corregir errores de integración.
 - [ ] README completo y documentación.
 - [ ] Diapositivas (máx. 4) para la exposición.
