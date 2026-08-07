@@ -1,6 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export function ProductCard({ producto, onVer, onEliminar }) {
+  const [menuAbierto, setMenuAbierto] = useState(false)
+
+  const cerrarMenu = () => setMenuAbierto(false)
+
   const imagenFallback = 'https://placehold.co/600x400?text=Sin+imagen'
   const productoId = producto?.id
   const nombreProducto = String(producto?.nombre ?? '').trim() || 'Producto sin nombre'
@@ -34,15 +39,17 @@ export function ProductCard({ producto, onVer, onEliminar }) {
     String(producto?.imagen ?? '').trim() || imagenFallback
 
   const verProducto = () => {
+    cerrarMenu()
     onVer?.(producto)
   }
 
-  const eliminarProducto = () => {
-    onEliminar?.(producto)
+  const elegirOpcion = (accion) => () => {
+    cerrarMenu()
+    accion()
   }
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
       <button
         type="button"
         onClick={verProducto}
@@ -73,6 +80,62 @@ export function ProductCard({ producto, onVer, onEliminar }) {
           Ver detalle
         </span>
       </button>
+
+      <div className="absolute right-3 top-3">
+        <button
+          type="button"
+          onClick={(evento) => {
+            evento.stopPropagation()
+            setMenuAbierto((v) => !v)
+          }}
+          className="rounded-full bg-white/90 p-1.5 text-slate-600 shadow-sm transition hover:bg-white hover:text-slate-900"
+          aria-label="Acciones del producto"
+          aria-expanded={menuAbierto}
+        >
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+          </svg>
+        </button>
+
+        {menuAbierto && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={cerrarMenu} aria-hidden="true"></div>
+            <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+              <button
+                type="button"
+                onClick={elegirOpcion(() => onVer?.(producto))}
+                className="block w-full px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+              >
+                Ver detalle
+              </button>
+              {puedeEditar ? (
+                <Link
+                  to={`/producto/${productoId}/editar`}
+                  onClick={cerrarMenu}
+                  className="block w-full px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+                >
+                  Editar
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="block w-full px-3 py-2 text-left text-sm text-slate-400"
+                >
+                  Editar
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={elegirOpcion(() => onEliminar?.(producto))}
+                className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+              >
+                Eliminar
+              </button>
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3">
@@ -105,41 +168,6 @@ export function ProductCard({ producto, onVer, onEliminar }) {
               {formatearPrecio(producto?.precio)}
             </p>
           )}
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
-          <button
-            type="button"
-            onClick={verProducto}
-            className="rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Ver producto
-          </button>
-
-          {puedeEditar ? (
-            <Link
-              to={`/producto/${productoId}/editar`}
-              className="rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-            >
-              Editar
-            </Link>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-400"
-            >
-              Editar
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={eliminarProducto}
-            className="col-span-2 rounded-xl px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700"
-          >
-            Eliminar producto
-          </button>
         </div>
       </div>
     </article>
