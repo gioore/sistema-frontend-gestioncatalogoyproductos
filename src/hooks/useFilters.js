@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
-  contarProductosCatalogo,
   extraerCategoriasDistinct,
   normalizarCategoria,
 } from '../utils/categorias.js'
@@ -14,29 +13,39 @@ export function useFilters(productos) {
     return extraerCategoriasDistinct(productos)
   }, [productos])
 
-  const cantidadTotalProductos = useMemo(
-    () => contarProductosCatalogo(productos),
-    [productos],
-  )
+  const limpiarFiltros = useCallback(() => {
+    setBusqueda('')
+    setCategoria('todas')
+    setSoloOferta(false)
+  }, [])
 
   const filtrados = useMemo(() => {
-    let lista = productos || []
-    const termino = busqueda.trim().toLowerCase()
+    let lista = Array.isArray(productos) ? productos : []
+    const termino = String(busqueda ?? '').trim().toLowerCase()
 
     if (termino) {
-      lista = lista.filter((p) => (p.nombre || '').toLowerCase().includes(termino))
+      lista = lista.filter((producto) =>
+        String(producto?.nombre ?? '')
+          .trim()
+          .toLowerCase()
+          .includes(termino),
+      )
     }
 
     if (categoria !== 'todas') {
-      lista = lista.filter((p) => normalizarCategoria(p.categoriaNombre) === categoria)
+      lista = lista.filter(
+        (producto) => normalizarCategoria(producto?.categoriaNombre) === categoria,
+      )
     }
 
     if (soloOferta) {
-      lista = lista.filter((p) => p.enOferta === true)
+      lista = lista.filter((producto) => producto?.enOferta === true)
     }
 
     return lista
   }, [productos, busqueda, categoria, soloOferta])
+
+  const cantidadResultados = useMemo(() => filtrados.length, [filtrados])
 
   return {
     busqueda,
@@ -46,7 +55,8 @@ export function useFilters(productos) {
     soloOferta,
     setSoloOferta,
     categoriasDistinct,
-    cantidadTotalProductos,
+    limpiarFiltros,
     filtrados,
+    cantidadResultados,
   }
 }

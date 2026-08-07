@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useProductos } from '../context/ProductContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 import { useFilters } from '../hooks/useFilters.js'
+import { CategoryMenu } from '../components/producto/CategoryMenu.jsx'
+import { FilterControls } from '../components/producto/FilterControls.jsx'
 import { ProductList } from '../components/producto/ProductList.jsx'
 import { DeleteConfirmModal } from '../components/producto/DeleteConfirmModal.jsx'
 import { ProductDetailModal } from '../components/producto/ProductDetailModal.jsx'
@@ -21,8 +23,16 @@ export function CatalogPage() {
   const { notify } = useToast()
 
   const {
+    busqueda,
+    setBusqueda,
+    categoria,
+    setCategoria,
+    soloOferta,
+    setSoloOferta,
+    limpiarFiltros,
     filtrados,
     categoriasDistinct,
+    cantidadResultados,
   } = useFilters(productos)
 
   const [productoParaEliminar, setProductoParaEliminar] = useState(null)
@@ -127,8 +137,33 @@ export function CatalogPage() {
           </p>
         </div>
 
+        <div className="mb-4 grid gap-4">
+          <FilterControls
+            busqueda={busqueda}
+            onBusquedaChange={setBusqueda}
+            categoria={categoria}
+            soloOferta={soloOferta}
+            onSoloOfertaChange={setSoloOferta}
+            onLimpiarFiltros={limpiarFiltros}
+            cantidadResultados={cantidadResultados}
+          />
+
+          <CategoryMenu
+            categorias={categoriasDistinct}
+            categoriaSeleccionada={categoria}
+            onCategoriaChange={setCategoria}
+            totalProductos={productos.length}
+          />
+        </div>
+
         {filtrados.length === 0 ? (
-          <EmptyState />
+          <EmptyState
+            mensaje={
+              productos.length === 0
+                ? 'No hay productos que mostrar.'
+                : 'No hay productos que coincidan con los filtros seleccionados.'
+            }
+          />
         ) : (
           <ProductList
             productos={filtrados}
