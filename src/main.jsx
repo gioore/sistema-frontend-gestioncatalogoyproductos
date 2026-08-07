@@ -4,12 +4,15 @@ import { HashRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import { ProductProvider } from './context/ProductContext.jsx'
+import { ToastProvider } from './context/ToastContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HashRouter>
       <ProductProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </ProductProvider>
     </HashRouter>
   </StrictMode>,

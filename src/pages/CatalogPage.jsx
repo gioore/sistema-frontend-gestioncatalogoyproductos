@@ -1,13 +1,33 @@
+import { useState } from 'react'
 import { useProductos } from '../context/ProductContext.jsx'
+import { useToast } from '../context/ToastContext.jsx'
 import { useFilters } from '../hooks/useFilters.js'
 import { ProductList } from '../components/producto/ProductList.jsx'
+import { DeleteConfirmModal } from '../components/producto/DeleteConfirmModal.jsx'
 import { Spinner } from '../components/ui/Spinner.jsx'
 import { ErrorMessage } from '../components/ui/ErrorMessage.jsx'
 import { EmptyState } from '../components/ui/EmptyState.jsx'
 
 export function CatalogPage() {
-  const { productos, loading, error, refetch } = useProductos()
+  const { productos, loading, error, refetch, eliminarProducto } = useProductos()
+  const { notify } = useToast()
   const { filtrados, categoriasDistinct } = useFilters(productos)
+
+  const [productoParaEliminar, setProductoParaEliminar] = useState(null)
+  const [eliminando, setEliminando] = useState(false)
+
+  const confirmarEliminacion = async (producto) => {
+    setEliminando(true)
+    try {
+      await eliminarProducto(producto.id)
+      notify('Producto eliminado correctamente.', 'success')
+      setProductoParaEliminar(null)
+    } catch (err) {
+      notify(err?.response?.data?.message || err?.message || 'No se pudo eliminar el producto.', 'error')
+    } finally {
+      setEliminando(false)
+    }
+  }
 
   if (loading) return <Spinner texto="Cargando productos..." />
 
@@ -24,8 +44,15 @@ export function CatalogPage() {
       {filtrados.length === 0 ? (
         <EmptyState />
       ) : (
-        <ProductList productos={filtrados} />
+        <ProductList productos={filtrados} onEliminar={setProductoParaEliminar} />
       )}
+
+      <DeleteConfirmModal
+        producto={productoParaEliminar}
+        onCancelar={() => setProductoParaEliminar(null)}
+        onConfirmar={confirmarEliminacion}
+        eliminando={eliminando}
+      />
     </main>
   )
 }
