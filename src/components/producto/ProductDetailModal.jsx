@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Modal } from '../ui/Modal.jsx'
+import { EmptyState } from '../ui/EmptyState.jsx'
 
 function formatoPrecio(valor) {
   if (valor == null) return '—'
@@ -7,15 +8,22 @@ function formatoPrecio(valor) {
 }
 
 export function ProductDetailModal({ producto, onCerrar, onEliminar }) {
+  const imagenFallback = 'https://placehold.co/600x400?text=Sin+imagen'
+  const productoValido = producto?.id != null || Boolean(producto?.nombre)
+
   return (
     <Modal abierto={!!producto} titulo={producto?.nombre || 'Detalle'} onCerrar={onCerrar}>
-      {producto && (
+      {productoValido ? (
         <div>
           <div className="aspect-[3/2] w-full overflow-hidden rounded-lg bg-slate-100">
             <img
-              src={producto.imagen || ''}
+              src={String(producto?.imagen ?? '').trim() || imagenFallback}
               alt={producto.nombre || 'Producto'}
               className="h-full w-full object-cover"
+              onError={(evento) => {
+                evento.currentTarget.onerror = null
+                evento.currentTarget.src = imagenFallback
+              }}
             />
           </div>
 
@@ -72,6 +80,8 @@ export function ProductDetailModal({ producto, onCerrar, onEliminar }) {
             </button>
           </div>
         </div>
+      ) : (
+        <EmptyState mensaje="No se encontró la información del producto." />
       )}
     </Modal>
   )
